@@ -21,6 +21,13 @@ jobs:
         run: | 
           echo 'TESTING'
 
+  DEPLOY:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: DEPLOY DSR
+        run: | 
+          echo 'DEPLOY DSR'
   
   
   
