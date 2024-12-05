@@ -5,10 +5,14 @@ on:
       - main
 
 jobs: 
-  SCRIPT:
+  BUILD:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Hola Mundo
+      - name: Aqui compilamos
         run: | 
-          echo 'Hola mundo'
+          echo 'Aqui compilamos'
+  
+  
+
+
