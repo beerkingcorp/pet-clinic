@@ -4,15 +4,39 @@ on:
     branches:
       - feature-clase1
 
-jobs: 
-  SAST:
+jobs:
+  create-sonar-project:
     runs-on: ubuntu-latest
     steps:
+      - name: Crear proyecto en SonarCloud y configurar rama por defecto
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          # Crear el proyecto en SonarCloud
+          curl -f -X POST -u "${SONAR_TOKEN}:" \
+            "https://sonarcloud.io/api/projects/create" \
+            -d "name=${REPO_NAME}" \
+            -d "project=${REPO_NAME}" \
+            -d "organization=devsecopsusach" \
+            -d "visibility=public"
 
-    - name: Creando Proyecto en Sonarcloud
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        REPO_NAME: ${{ github.event.repository.name }}
-      run: |
-        curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' -d 'name=${REPO_NAME}' 'project=${REPO_NAME}' -d 'organization=devsecopsusach' -d 'visibility=public'
-  
+          # Verificar si la creación fue exitosa o si el proyecto ya existe
+          if [ $? -ne 0 ]; then
+            echo "Proyecto ya existe en SonarCloud"
+          else
+            echo "Proyecto $REPO_NAME fue creado exitosamente en SonarCloud"
+            echo "Estableciendo rama 'main' como rama por defecto..."
+
+            # Establecer la rama main como la rama por defecto
+            curl -f -X POST -u "${SONAR_TOKEN}:" \
+              "https://sonarcloud.io/api/project_branches/rename" \
+              -d "name=main" \
+              -d "project=${REPO_NAME}"
+
+            if [ $? -ne 0 ]; then
+              echo "Error al establecer la rama 'main' como rama por defecto"
+            else
+              echo "La rama 'main' fue establecida como rama por defecto exitosamente."
+            fi
+          fi
