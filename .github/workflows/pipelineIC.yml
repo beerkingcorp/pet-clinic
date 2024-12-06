@@ -5,12 +5,17 @@ on:
       - feature-clase1
 
 jobs: 
-  SAST:
-    runs-on: ubuntu-24.04
+  create-sonar-project:
+    runs-on: ubuntu-latest
     steps:
-
-    - name: Creando Proyecto en Sonarcloud
-      run: |
-        set +e
-        curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' -d 'name=${{ github.event.repository.name }}' 'project=${{ github.event.repository.name }}' -d 'organization=devsecopsusach' -d 'visibility=public'
-  
+      - name: Send request to SonarCloud API
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          curl -f -X POST -u "${SONAR_TOKEN}:" \
+          "https://sonarcloud.io/api/projects/create" \
+          -d "name=${REPO_NAME}" \
+          -d "project=${REPO_NAME}" \
+          -d "organization=devsecopsusach" \
+          -d "visibility=public"
