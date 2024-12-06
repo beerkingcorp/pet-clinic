@@ -14,6 +14,3 @@ jobs:
         set +e
         curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' -d 'name=pet-clinic' -d 'organization=devsecopsusach' -d 'visibility=public'
   
-  
-
-
