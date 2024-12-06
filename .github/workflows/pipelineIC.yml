@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Crear proyecto en SonarCloud y configurar rama por defecto
+        id: validateProjectOnSonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           REPO_NAME: ${{ github.event.repository.name }}
@@ -39,4 +40,26 @@ jobs:
             else
               echo "La rama 'main' fue establecida como rama por defecto exitosamente."
             fi
+          fi
+      
+      - name: Validando tipo de proyecto
+        id: tipoProyecto
+        if: steps.validateProjectOnSonar.outputs.proyectoExiste == '1'
+        run: |
+          pwd
+          ls -R
+          if [ -f "build.gradle" ]
+          then
+            echo "Proyecto Java"
+            if grep -q 'id "org.sonarqube" version "3.3"' build.gradle
+            then
+              echo "El plugin de SonarCloud ya está presente en build.gradle"
+            else
+              sed -i '/id '\''java'\''/a \ \ \ \ id '\''org.sonarqube'\'' version '\''3.3'\''' build.gradle
+              echo "El plugin de SonarCloud no estaba presente y se ha sido añadido a build.gradle"
+              cat build.gradle
+            fi
+
+          else
+            echo "Tipo de proyecto desconocido"
           fi
