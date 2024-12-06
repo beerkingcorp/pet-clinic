@@ -11,7 +11,7 @@ jobs:
 
     - name: Creando Proyecto en Sonarcloud
       run: |
-        curl -f -X POST -u '${{ secret.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' -d 'name=${{ github.event.repository.name }}' -d 'organization=devsecopsusach' -d 'visibility=public'
+        curl -f -X POST -u '${{ secrets.SONAR_TOKEN }}:' 'https://sonarcloud.io/api/projects/create' -d 'name=${{ github.event.repository.name }}' -d 'organization=devsecopsusach' -d 'visibility=public'
   
   
 
