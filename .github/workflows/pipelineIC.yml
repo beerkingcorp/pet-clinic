@@ -92,3 +92,4 @@ jobs:
           echo "El proyecto no cumple con el Quality Gate. Estado: $qualityGateStatus"
           exit 1
         fi
+
