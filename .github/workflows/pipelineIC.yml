@@ -27,39 +27,39 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         REPO_NAME: ${{ github.event.repository.name }}
-        run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$SONAR_TOKEN:" \
-            "https://sonarcloud.io/api/projects/search?projects=$REPO_NAME")
+      run: |
+        response=$(curl -s -o /dev/null -w "%{http_code}" -u "$SONAR_TOKEN:" \
+          "https://sonarcloud.io/api/projects/search?projects=$REPO_NAME")
 
-          if [ "$response" -eq 200 ]; then
-            echo "El proyecto $REPO_NAME ya existe en SonarCloud."
+        if [ "$response" -eq 200 ]; then
+          echo "El proyecto $REPO_NAME ya existe en SonarCloud."
+          echo "proyectoExiste=1" >> $GITHUB_ENV
+        else
+          echo "Intentando crear el proyecto $REPO_NAME en SonarCloud..."
+          create_response=$(curl -s -w "%{http_code}" -o /dev/null -X POST -u "$SONAR_TOKEN:" \
+            "https://sonarcloud.io/api/projects/create" \
+            -d "name=$REPO_NAME" \
+            -d "project=$REPO_NAME" \
+            -d "organization=devsecopsusach" \
+            -d "visibility=public")
+
+          if [ "$create_response" -eq 400 ]; then
+            echo "El proyecto ya existe según la respuesta de creación (HTTP 400). Continuando..."
             echo "proyectoExiste=1" >> $GITHUB_ENV
+          elif [ "$create_response" -eq 201 ]; then
+            echo "El proyecto $REPO_NAME fue creado exitosamente en SonarCloud."
+            echo "proyectoExiste=0" >> $GITHUB_ENV
+
+            echo "Estableciendo rama main como rama por defecto..."
+            curl -s -f -X POST -u "$SONAR_TOKEN:" \
+              "https://sonarcloud.io/api/project_branches/rename" \
+              -d "name=main" \
+              -d "project=$REPO_NAME"
           else
-            echo "Intentando crear el proyecto $REPO_NAME en SonarCloud..."
-            create_response=$(curl -s -w "%{http_code}" -o /dev/null -X POST -u "$SONAR_TOKEN:" \
-              "https://sonarcloud.io/api/projects/create" \
-              -d "name=$REPO_NAME" \
-              -d "project=$REPO_NAME" \
-              -d "organization=devsecopsusach" \
-              -d "visibility=public")
-
-            if [ "$create_response" -eq 400 ]; then
-              echo "El proyecto ya existe según la respuesta de creación (HTTP 400). Continuando..."
-              echo "proyectoExiste=1" >> $GITHUB_ENV
-            elif [ "$create_response" -eq 201 ]; then
-              echo "El proyecto $REPO_NAME fue creado exitosamente en SonarCloud."
-              echo "proyectoExiste=0" >> $GITHUB_ENV
-
-              echo "Estableciendo rama main como rama por defecto..."
-              curl -s -f -X POST -u "$SONAR_TOKEN:" \
-                "https://sonarcloud.io/api/project_branches/rename" \
-                -d "name=main" \
-                -d "project=$REPO_NAME"
-            else
-              echo "Error inesperado al intentar crear el proyecto. Respuesta HTTP: $create_response"
-              exit 1
-            fi
+            echo "Error inesperado al intentar crear el proyecto. Respuesta HTTP: $create_response"
+            exit 1
           fi
+        fi
 
 
     - name: Validate and Update Gradle for SonarCloud
