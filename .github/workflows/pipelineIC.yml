@@ -75,15 +75,6 @@ jobs:
         else
           echo "No se encontró build.gradle. Tipo de proyecto desconocido."
         fi
-
-    - name: Validate SonarQube Plugin
-      run: |
-        if ! grep -q 'id "org.sonarqube"' build.gradle; then
-          echo "El plugin de SonarQube no está configurado en build.gradle. Añadiéndolo..."
-          sed -i '/id '\''java'\''/a \ \ \ \ id '\''org.sonarqube'\'' version '\''3.3'\''' build.gradle
-        else
-          echo "El plugin de SonarQube ya está configurado."
-        fi
     
     - name: Run SonarQube Analysis
       env:
