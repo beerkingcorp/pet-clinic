@@ -26,7 +26,11 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           if [ -f "build.gradle" ]; then
-            echo "Ecnontrò el archivo"
+            echo "Encontró el archivo"
+            echo ""
+
+
+
           else
             echo "no se encontró archivo build.gradle"
             exit 1
