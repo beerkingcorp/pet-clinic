@@ -50,15 +50,15 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
           echo "Verificando si el proyecto $REPO_NAME existe en SonarCloud..."
-          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$SONAR_TOKEN" \
+          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$SONAR_TOKEN:" \
             "https://sonarcloud.io/api/projects/search?projects=$REPO_NAME")
 
           if [ "$response" -ne 200 ]; then
             echo "El proyecto no existe. Creándolo en SonarCloud..."
-            create_response=$(curl -s -w "%{http_code}" -o /dev/null -X POST -u "$SONAR_TOKEN" \
+            create_response=$(curl -s -w "%{http_code}" -o /dev/null -X POST -u "$SONAR_TOKEN:" \
               "https://sonarcloud.io/api/projects/create" \
               -d "name=$REPO_NAME" \
-              -d "organization=beerkingc0rp" \
+              -d "organization=usachlab" \
               -d "project=$REPO_NAME" \
               -d "visibility=public")
 
@@ -67,7 +67,7 @@ jobs:
             fi
 
             echo "Estableciendo la rama main como predeterminada..."
-            curl -s -f -X POST -u "$SONAR_TOKEN" \
+            curl -s -f -X POST -u "$SONAR_TOKEN:" \
               "https://sonarcloud.io/api/project_branches/rename" \
               -d "name=main" \
               -d "project=$REPO_NAME"
@@ -91,7 +91,7 @@ jobs:
           echo "Realizando análisis inicial en la rama main..."
           ./gradlew sonarqube \
             -Dsonar.projectKey=$REPO_NAME \
-            -Dsonar.organization=beerkingc0rp \
+            -Dsonar.organization=usachlab \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.branch.name=main
@@ -106,7 +106,7 @@ jobs:
           echo "Realizando análisis en la rama actual: $BRANCH_NAME..."
           ./gradlew sonarqube \
             -Dsonar.projectKey=$REPO_NAME \
-            -Dsonar.organization=beerkingc0rp \
+            -Dsonar.organization=usachlab \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.branch.name=$BRANCH_NAME
